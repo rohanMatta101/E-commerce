@@ -7,6 +7,7 @@ import ProductDetailScreen from '../Screens/Shop/ProductDetailScreen';
 import CartScreen from '../Screens/Shop/CartScreen';
 import orderScreen from '../Screens/Shop/OrderScreen';
 import UserProductsScreen from '../Screens/User/UserProducts';
+import EditProductsScreen from '../Screens/User/EditProducts';
 //import OrderScreen from '../Screens/Shop/OrderScreen';
 const productNavigator = createStackNavigator({
     
@@ -22,7 +23,8 @@ const orderNavigator = createStackNavigator({
     orders : orderScreen
 })
 const adminNavigator = createStackNavigator({
-    userProducts : UserProductsScreen
+    userProducts : UserProductsScreen,
+    editProducts : EditProductsScreen
 })
 const ShopNavigator = createDrawerNavigator({
     Products : productNavigator,

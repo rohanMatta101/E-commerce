@@ -26,7 +26,7 @@ const cartScreen = props=>{
    return (
        <View>
            <View style={styles.summary}>
-           <Text style={{fontSize:18,marginTop:8}}>Total Amount:${props.cart.totalAmount.toFixed(2)}</Text>
+           <Text style={{fontSize:18,marginTop:8}}>Total Amount:${Math.round(props.cart.totalAmount.toFixed(2)*100)/100}</Text>
            <Button title="Order Now" disabled={cartItemArray.length === 0} onPress={()=>dispatch(orderActions.addOrder(props.cart.item,props.cart.totalAmount))} />
            </View>
            <FlatList data={cartItemArray} keyExtractor={item=>item.productId} renderItem={itemData=><CartRender  title={itemData.item.title} quantity={itemData.item.quantity} onremove={()=>dispatch(CartActions.removeFromCart(itemData.item.productId))}/>}/>

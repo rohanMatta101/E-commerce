@@ -1,5 +1,5 @@
 import React from 'react';
-import { FlatList,Platform } from 'react-native';
+import { FlatList,Platform,View,Button } from 'react-native';
 import ProductRender from '../../Components/Shop/ProductRender';
 import { useDispatch } from 'react-redux'
 import * as CartActions from '../../Store/Actions/CartActions';
@@ -8,15 +8,26 @@ import customHeaderButton from '../../Components/UI/customHeaderButtons';
 
 import {connect} from 'react-redux'
 const productOverViewScreen =(props)=>{
+  //selectItemHandler works same as viewDetails
+  const selectItemHandler = (id,title)=>{
+    props.navigation.navigate({
+      routeName:'productDetail',params:{
+        prodId : id,
+        prodTitle : title
+      }})
+  }
     const dispatch = useDispatch();
     return (
-        <FlatList data={props.products} renderItem={itemData=><ProductRender title={itemData.item.title} price={itemData.item.price} imageUrl={itemData.item.ImageUrl} 
-           onViewDetails={()=>props.navigation.navigate({
-            routeName:'productDetail',params:{
-              prodId : itemData.item.id,
-              prodTitle : itemData.item.title
-            }})} 
-            onAddToCart={()=>dispatch(CartActions.addtocart(itemData.item)) } />}
+        <FlatList data={props.products} renderItem={itemData=>
+        <ProductRender title={itemData.item.title} price={itemData.item.price} imageUrl={itemData.item.ImageUrl} 
+           onSelect={()=>selectItemHandler(itemData.item.id,itemData.item.title)} >
+              <View style={{borderWidth:1.5,borderColor:'grey',borderRadius:5,marginHorizontal:5}}>
+                <Button  title="View Details" onPress={()=>selectItemHandler(itemData.item.id,itemData.item.title)} ></Button>
+                </View>
+                <View style={{borderWidth:1.5,borderColor:'grey',borderRadius:5,marginHorizontal:5}}>
+                <Button title="Add To Cart" onPress={()=>dispatch(CartActions.addtocart(itemData.item))}></Button>
+                </View>
+            </ProductRender>}
             />
              
             

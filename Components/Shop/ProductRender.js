@@ -8,7 +8,7 @@ const productRender=(props)=>{
         touchableCmp=TouchableNativeFeedback;
     }
     return (
-        <TouchableCmp onPress={props.onViewDetails} >
+        <TouchableCmp onPress={props.onSelect} >
         <View style={styles.product}>
             <Image source={{uri:props.imageUrl}} style={styles.image}/>
             <View style={{margin:5,flexDirection:'row',justifyContent:'space-between'}}>
@@ -16,13 +16,7 @@ const productRender=(props)=>{
             <Text style={{fontSize:20,fontWeight:'bold'}}>${props.price}</Text>
             </View>
             <View style={styles.actions}>
-                <View style={{borderWidth:1.5,borderColor:'grey',borderRadius:5,marginHorizontal:5}}>
-                <Button  title="View Details" onPress={props.onViewDetails} ></Button>
-                </View>
-                <View style={{borderWidth:1.5,borderColor:'grey',borderRadius:5,marginHorizontal:5}}>
-                <Button title="Add To Cart" onPress={props.onAddToCart}></Button>
-                </View>
-                
+                {props.children}
             </View>
         </View>
         </TouchableCmp>
