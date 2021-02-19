@@ -11,7 +11,7 @@ const cartRender = props =>{
           </View>
           
           <TouchableOpacity>
-              <Ionicons style={{marginTop:13,marginRight:20}} onPress={props.onremove} name={Platform.OS === 'android' ? 'md-trash' : 'ios-trash'} color='gray' size={30}/>
+              <Ionicons style={{marginTop:13,marginRight:20}} onPress={props.onremove} name={Platform.OS === 'android' ? 'md-trash' : 'ios-trash'} color="#150485" size={30}/>
           </TouchableOpacity>
       </View>
   )

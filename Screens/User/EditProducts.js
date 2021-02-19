@@ -1,64 +1,148 @@
-import React,{useState,useCallback,useEffect} from 'react';
-import { View,Text,ScrollView,TextInput,StyleSheet,Platform } from 'react-native';
+import React,{useState,useCallback,useEffect,useReducer} from 'react';
+import { View,Text,ScrollView,TextInput,StyleSheet,Platform,Alert,KeyboardAvoidingView,ActivityIndicator } from 'react-native';
 import { HeaderButtons,Item } from 'react-navigation-header-buttons';
 import customHeaderButton from '../../Components/UI/customHeaderButtons';
 import * as productActions from '../../Store/Actions/ProductActions';
-import  { connect,useDispatch } from 'react-redux'
+import  { connect,useDispatch } from 'react-redux';
+const FORM_UPDATE = 'FORM_UPDATE';
+const formReducer=(state,action)=>{ //behaves "LIKE a" Reducer
+    if(action.type === FORM_UPDATE)
+    {
+       const updatedInputValues={
+           ...state.inputValues,
+           [action.inputType] : action.value 
+        }
+        const updatedInputValidity={
+            ...state.inputValidities,
+            [action.inputType] : action.validity
+        }
+        let updatedFormIsValid=true;
+        for(const key in updatedInputValidity)
+        {
+            updatedFormIsValid=updatedFormIsValid&&updatedInputValidity[key]
+        }
+        return {
+            formValid:updatedFormIsValid,
+            inputValues : updatedInputValues,
+            inputValidities : updatedInputValidity
+        }   
+    }
+    return state;
+}
 const editProducts = props =>{
     const dispatch = useDispatch();
     const prodId = props.navigation.getParam('productId');
     const toBeEditedProduct = props.products.find(prod => prod.id === prodId);
+    const [isLoading,setIsLoading] = useState(false);
+    const [error,setError] = useState();
     //console.log(props.navigation.getParam('productId'))
     
-
-    const [title,setTitle] = useState(toBeEditedProduct ? toBeEditedProduct.title : ''); // if product to be edited found we pre populate the fields with its data else we simply leave it blank as we are noew in the case where we are adding data
-    const [price,setPrice] = useState('');
-    const [imageUrl,setImageUrl] = useState(toBeEditedProduct ? toBeEditedProduct.ImageUrl : '');
-    const [description,setDescription] = useState(toBeEditedProduct ? toBeEditedProduct.description : '');
-    const submitHanlder=useCallback(()=>{
+    const [formState,dispatchFormState] = useReducer(formReducer,{ //formstate always gives the present/current state
+        //dispatchFormstate dispatches actions to change form state
+        inputValues:{
+            title : toBeEditedProduct ? toBeEditedProduct.title : '' ,
+            imageUrl : toBeEditedProduct ? toBeEditedProduct.ImageUrl : '',
+            description : toBeEditedProduct ? toBeEditedProduct.description : '',
+            price :  ''
+        },
+        inputValidities :{
+            title : toBeEditedProduct ? true : false,
+            imageUrl : toBeEditedProduct ? true : false,
+            description : toBeEditedProduct ? true : false,
+            price : toBeEditedProduct ? true : false,
+        },
+        formValid : toBeEditedProduct ? true : false
+    })
+    useEffect(()=>{
+        if(error)
+        {
+            Alert.alert('Something went wrong',error,[{
+                text : 'Okay'
+            }])
+        }
+    },[error])
+    const submitHanlder=  useCallback(async()=>{
+        if(!formState.formValid)
+        {
+           Alert.alert('Invalid Input!','Try again',[{
+               text :'Okay',
+               style:'default'
+           }])
+           return;
+        }
+        setIsLoading(true);
+        setError(null);
+        try{
         if(toBeEditedProduct)
         {
-         dispatch(productActions.updateProduct(toBeEditedProduct.id,title,imageUrl,description));
+         await dispatch(productActions.updateProduct(toBeEditedProduct.id,formState.inputValues.title,formState.inputValues.imageUrl,formState.inputValues.description));
         }
         else{
-         dispatch(productActions.createProduct(title,imageUrl,description,+price));
+          await dispatch(productActions.createProduct(formState.inputValues.title,formState.inputValues.imageUrl,formState.inputValues.description,+formState.inputValues.price));
         }
+        props.navigation.goBack();
+        }catch(err)
+        {
+            setError(err.message);
+        }
+        setIsLoading(false);
         
-        props.navigation.goBack()
-     },[dispatch,prodId,title,imageUrl,description,price]);
+     },[dispatch,prodId,formState]);
 
      useEffect(()=>{
          props.navigation.setParams({submit : submitHanlder})
      },[submitHanlder]);
-     
+
+    const textChangeHandler=(inputIdentifier,text)=>{ //current value of the input is automatically passed to this fxn when called from onChangeText 
+        let isValid =false;
+       if(text.trim().length > 0)
+       {
+           isValid=true;
+       }
+       dispatchFormState({type : FORM_UPDATE,value : text, validity :isValid, inputType : inputIdentifier })
+    } 
+    
+     if(isLoading)
+     {
+         return <View style={{flex :1,justifyContent:'center',alignItems:'center'}}>
+             <ActivityIndicator size="large" color="default" />
+         </View>
+     }
     return (
+        <KeyboardAvoidingView behavior="padding" style={{flex:1}} >
         <ScrollView>
             <View style={styles.form}>
                 <View style={styles.formcontrol}>
                     <Text style={styles.text}>Title</Text>
-                    <TextInput style={styles.input} value={title} onChangeText={text=>setTitle(text)}/>
+                    <TextInput style={styles.input} value={formState.inputValues.title} onChangeText={textChangeHandler.bind(this,'title')} keyboardType='default'/>
                 </View>
                 {toBeEditedProduct?  null :(
                 <View style={styles.formcontrol}>
                     <Text style={styles.text}>Price</Text>
-                    <TextInput style={styles.input}  value={price} onChangeText={text=>setPrice(text)}/>
+                    <TextInput style={styles.input}  value={formState.inputValues.price} onChangeText={textChangeHandler.bind(this,'price')} keyboardType='decimal-pad'/>
                 </View>)}
                 <View style={styles.formcontrol}>
                     <Text style={styles.text}>Image Url</Text>
-                    <TextInput style={styles.input} value={imageUrl} onChangeText={text=>setImageUrl(text)}/>
+                    <TextInput style={styles.input} value={formState.inputValues.imageUrl} onChangeText={textChangeHandler.bind(this,'imageUrl')} keyboardType="default"/>
                 </View>
                 <View style={styles.formcontrol}>
                     <Text style={styles.text}>Description</Text>
-                    <TextInput style={styles.input} value={description} onChangeText={text=>setDescription(text)}/>
+                    <TextInput style={styles.input} value={formState.inputValues.description} onChangeText={textChangeHandler.bind(this,'description')} keyboardType="default"/>
                 </View>
             </View>
         </ScrollView>
+        </KeyboardAvoidingView>
     )
 }
 editProducts.navigationOptions = navData=>{
     const submitFXN = navData.navigation.getParam('submit');
     return {
         headerTitle : navData.navigation.getParam('productId') ? 'Edit Product' : 'Add Product',
+        headerStyle:{
+            backgroundColor:'#150485',
+            
+        },
+        headerTintColor :'#ffc93c',
         headerRight : <HeaderButtons HeaderButtonComponent={customHeaderButton}>
         <Item title="checkmark" iconName={Platform.OS === 'android' ? 'md-checkmark' : 'ios-checkmark'} onPress={submitFXN}  />
         </HeaderButtons>

@@ -1,5 +1,5 @@
-import React from 'react';
-import { View,Text,Button,StyleSheet } from 'react-native';
+import React,{useState} from 'react';
+import { View,Text,Button,StyleSheet,ActivityIndicator } from 'react-native';
 import { FlatList } from 'react-native-gesture-handler';
 //import { FlatList } from 'react-native-gesture-handler';
 import { connect,useDispatch } from 'react-redux';
@@ -10,6 +10,7 @@ import CartRender from '../../Components/Shop/CartRender';
 
 const cartScreen = props=>{
     const dispatch = useDispatch();
+    const [isLoading,setIsLoading] = useState(false);
     const cartItemArray=[]
     for(const key in props.cart.item )
     {
@@ -21,22 +22,32 @@ const cartScreen = props=>{
             quantity : props.cart.item[key].Quantity,
         })
     }
+    const orderDispatch=async ()=>{
+        setIsLoading(true);
+        await dispatch(orderActions.addOrder(props.cart.item,props.cart.totalAmount))
+        setIsLoading(false);
+    }
     //console.log(cartItemArray);
-
    return (
        <View>
            <View style={styles.summary}>
            <Text style={{fontSize:18,marginTop:8}}>Total Amount:${Math.round(props.cart.totalAmount.toFixed(2)*100)/100}</Text>
-           <Button title="Order Now" disabled={cartItemArray.length === 0} onPress={()=>dispatch(orderActions.addOrder(props.cart.item,props.cart.totalAmount))} />
+           {isLoading ? <ActivityIndicator size="small" color="blue"/> :(
+           <Button title="Order Now" color="#150485" disabled={cartItemArray.length === 0} onPress={orderDispatch} />)}
            </View>
-           <FlatList data={cartItemArray} keyExtractor={item=>item.productId} renderItem={itemData=><CartRender  title={itemData.item.title} quantity={itemData.item.quantity} onremove={()=>dispatch(CartActions.removeFromCart(itemData.item.productId))}/>}/>
+           <FlatList data={cartItemArray} keyExtractor={item=>item.productId} renderItem={itemData=><CartRender  title={itemData.item.title} quantity={itemData.item.quantity} onremove={()=> dispatch(CartActions.removeFromCart(itemData.item.productId))}/>}/>
        </View>
        
    )
 }
 cartScreen.navigationOptions = navData =>{
     return {
-        headerTitle : 'Your Cart'
+        headerTitle : 'Your Cart',
+        headerStyle:{
+            backgroundColor:'#150485',
+            
+        },
+        headerTintColor :'#ffc93c',
     }
 }
 const styles = StyleSheet.create({

@@ -3,6 +3,6 @@ import { HeaderButton } from 'react-navigation-header-buttons';
 import { Ionicons } from '@expo/vector-icons' 
 
 const customHeaderButtons=(props)=>{
-    return <HeaderButton {...props} IconComponent={Ionicons} iconSize={25} color='blue'/>
+    return <HeaderButton {...props} IconComponent={Ionicons} iconSize={25} color='#ffc93c'/>
 }
 export default customHeaderButtons

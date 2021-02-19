@@ -1,15 +1,22 @@
 import PRODUCTS from '../../Data/dummy-data';
 import {DELETE_PRODUCT} from '../Actions/ProductActions';
 import Product from '../../Models/Products';
-import { CREATE_PRODUCT,UPDATE_PRODUCT } from '../Actions/ProductActions';
+import { CREATE_PRODUCT,UPDATE_PRODUCT,SET_PRODUCTS } from '../Actions/ProductActions';
 const initialState={
-    availableProducts : PRODUCTS, //LIST OF ALL PRODUCTS
-    userProducts : PRODUCTS.filter(prod => prod.ownerId === 'u1') //LIST OF PRODUCTS OF THE CURRENTLY LOGGED IN USER
+    availableProducts : [], //LIST OF ALL PRODUCTS
+    userProducts : [] //LIST OF PRODUCTS OF THE CURRENTLY LOGGED IN USER
 }
 
 const productReducer=(state=initialState,action)=>{
     switch(action.type)
     {
+        case SET_PRODUCTS:
+            //fetching from the server
+            return {
+                ...state,
+                availableProducts : action.products,
+                userProducts : action.userProducts
+            }
        case DELETE_PRODUCT:
             return {
                 ...state,
@@ -17,7 +24,7 @@ const productReducer=(state=initialState,action)=>{
                 userProducts : state.userProducts.filter(product=>product.id !== action.prodId)
             }
         case CREATE_PRODUCT:
-            const newProduct = new Product(new Date().toString(),"u1",action.title,action.imageUrl,action.description,action.price);
+            const newProduct = new Product(action.id,action.ownerId,action.title,action.imageUrl,action.description,action.price);
             return {
                 ...state,
                 availableProducts : state.availableProducts.concat(newProduct),

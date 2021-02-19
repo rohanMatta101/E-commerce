@@ -15,7 +15,7 @@ const productDetailScreen=(props)=>{
     <View>
         <Image style={styles.image} source={{uri:selectedProduct.ImageUrl}}/>
         <View style={styles.button}>
-         <Button title="Add to Cart" onPress={()=>dispatch(cartActions.addtocart(selectedProduct))}/>
+         <Button title="Add to Cart" color="#ffc93c" onPress={()=>dispatch(cartActions.addtocart(selectedProduct))}/>
         </View>
         
         <View style={styles.description}>
@@ -39,7 +39,8 @@ const styles=StyleSheet.create({
         borderRadius:10,
         borderColor:'grey',
         width:'60%',
-        alignSelf:'center'
+        alignSelf:'center',
+        backgroundColor:"#150485"
     },
     description:{
         alignSelf:'center'
